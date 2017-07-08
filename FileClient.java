@@ -45,11 +45,13 @@ public class FileClient {
                         ItemFile itemFile = (ItemFile) objectInputStream.readObject();
                         System.out.println(itemFile.toString());
                         Utils.DownloadFromStorage(itemFile);
-                        // 首先到主存储设备上相应的文件,并且要携带备份信息的端口号
-
-
                         break;
                     case "remove":
+                        Utils.RequestDeleteFile(parameter,socket1);
+                        ObjectInputStream objectInputStream1 = new ObjectInputStream(socket1.getInputStream());
+                        ItemFile itemFile1 = (ItemFile) objectInputStream1.readObject();
+                        System.out.println(itemFile1.toString());
+                        Utils.DeleterFromStorage(itemFile1);
                         break;
 
                 }

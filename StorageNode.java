@@ -30,6 +30,10 @@ public class StorageNode {
                         Utils.FileDownload(dataInputStream,dataOutputStream);
                         break;
                     case 3:
+                        String filename = dataInputStream.readUTF();
+                        System.out.println(filename);
+                        File file = new File(filename);
+                        file.delete();
                         break;
                 }
             }

@@ -28,6 +28,15 @@ public class Utils {
             e.printStackTrace();
         }
     }
+    public static void RequestDeleteFile(String uuid,Socket socket){
+        try {
+            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            dataOutputStream.writeInt(2); //type 代表类型为删除文件
+            dataOutputStream.writeUTF(uuid);//只需要输入文件名
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
     // 用来发送文件内容到StorageNode,同时把备份信息的端口号发送过去，其中端口信息放到最后
     public static void UploadtoStorage(File file,String uuid, Socket socket, int port2) {
         DataOutputStream dataOutputStream = null;
@@ -42,6 +51,25 @@ public class Utils {
                 dataOutputStream.write(line);
             }
             dataOutputStream.writeInt(port2);  // 将备份的信息存到最后
+            dataOutputStream.flush();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public static void DeleterFromStorage(ItemFile itemFile){
+        int port1 = itemFile.port1;
+        int port2 = itemFile.port2;
+        SenddeletetoStorage(itemFile.uuid,port1);
+        System.out.println("删除信息发送到"+port1);
+        SenddeletetoStorage(itemFile.uuid,port2);
+        System.out.println("删除信息发送到"+port2);
+    }
+    public static void SenddeletetoStorage(String filename,int port){
+        try {
+            Socket socket = new Socket("127.0.0.1",port);
+            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+            dataOutputStream.writeInt(3);
+            dataOutputStream.writeUTF(filename);
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();

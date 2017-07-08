@@ -1,7 +1,4 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -21,7 +18,7 @@ public class FileopeThread extends Thread {
     @Override
     public void run() {
         try {
-            ServerSocket ss = new ServerSocket(3333); // 用来监听StotageNode的注册信息
+            ServerSocket ss = new ServerSocket(3333); // 用来监听FileClient端的信息
             while (true){
                 Socket socket = ss.accept();
                 new Thread(new Runnable() {
@@ -39,6 +36,10 @@ public class FileopeThread extends Thread {
                                 case 1:
                                     ObjectOutputStream objectOutputStream = new ObjectOutputStream(dataOutputStream);
                                     parseupdownload(dataInputStream,objectOutputStream);
+                                    break;
+                                case 2:
+                                    ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(dataOutputStream);
+                                    parsedelete(dataInputStream,objectOutputStream1);
                             }
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -49,6 +50,10 @@ public class FileopeThread extends Thread {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void parsedelete(DataInputStream dataInputStream, ObjectOutputStream dataOutputStream) {
+        parseupdownload(dataInputStream,dataOutputStream);
     }
 
     private void parseupdownload(DataInputStream dataInputStream, ObjectOutputStream objectOutputStream) {
