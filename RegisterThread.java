@@ -1,6 +1,6 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -9,25 +9,29 @@ import java.util.ArrayList;
  * Created by chaomaer on 7/6/17.
  */
 public class RegisterThread extends Thread {
+    public NodeInfo nodeInfo;
+    public byte[] buffer = new byte[213];
     public ArrayList<Integer> arrayList = new ArrayList<>(); // 用来存储注册的各个StotageNode
     @Override
     public void run() {
             try {
-                ServerSocket ss = new ServerSocket(2222); // 用来监听StotageNode的注册信息
+                DatagramSocket ss = new DatagramSocket(2222); // 用来监听StotageNode的注册信息
                 while (true){
-                    Socket socket = ss.accept();
+                    DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
+                    ss.receive(packet);
                     new Thread(new Runnable() {
                         @Override
                         public void run() {
+                            ByteArrayInputStream bais = new ByteArrayInputStream(buffer);
                             try {
-                                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                                DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                                int val = dataInputStream.readInt();
-                                arrayList.add(val);
-                                dataOutputStream.writeInt(1);
-                                dataOutputStream.flush();
-                                System.out.println(val+" "+"注册完毕");
-                                socket.close();
+                                ObjectInputStream ois = new ObjectInputStream(bais);
+                                try {
+                                    NodeInfo nodeInfo = (NodeInfo) ois.readObject();
+                                    arrayList.add(nodeInfo.NodePort);
+                                    System.out.println(nodeInfo.NodePort+"已经注册到了FileServer");
+                                } catch (ClassNotFoundException e) {
+                                    e.printStackTrace();
+                                }
                             } catch (IOException e) {
                                 e.printStackTrace();
                             }
