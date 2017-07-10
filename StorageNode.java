@@ -1,6 +1,9 @@
 import java.io.*;
 import java.net.*;
+import java.util.Date;
 import java.util.Properties;
+import java.util.Timer;
+import java.util.TimerTask;
 
 /**
  * Created by chaomaer on 7/6/17.
@@ -8,14 +11,18 @@ import java.util.Properties;
 public class StorageNode {
     public static NodeInfo nodeInfo;
     public static int listeningport;
+    public static Timer timer;
+    //定时发送数据包的时间为2分钟
+    public static final long period = 1000*2;
     public static void main(String[] args) {
         readinitfile();
         listeningport = nodeInfo.NodePort;
         System.out.println("storageNode is ready in port "+listeningport);
-        registertoFileServer2(listeningport);
+        registertoFileServer(listeningport);
+        // 2分钟向FileServer发送一次数据包
+        startTimer();
         try {
             ServerSocket serverSocket = new ServerSocket(listeningport);
-//            registertoFileServer(listeningport);
             while (true){
                 Socket socket = serverSocket.accept();
                 String ss;
@@ -45,6 +52,29 @@ public class StorageNode {
         }
     }
 
+    private static void startTimer() {
+        timer = new Timer();
+        timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                try {
+                    DatagramSocket datagramSocket = new DatagramSocket(listeningport);
+                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+                    DataOutputStream dos = new DataOutputStream(bos);
+                    dos.writeInt(listeningport);
+                    byte[] buffer = bos.toByteArray();
+                    DatagramPacket packet = new DatagramPacket(buffer,buffer.length,
+                            InetAddress.getLocalHost(),9999);
+                    datagramSocket.send(packet);
+                    System.out.println("发送了一个确认连接数据包");
+                    datagramSocket.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        },new Date(System.currentTimeMillis()+period),period);
+    }
+
     private static void readinitfile() {
         try {
             Properties properties = new Properties();
@@ -57,22 +87,7 @@ public class StorageNode {
             e.printStackTrace();
         }
     }
-    // 注意文档要求使用UDP进行注册StorageNode到FileServer
-    private static void registertoFileServer(int listeningport) {
-        try {
-            Socket socket = new Socket("127.0.0.1",2222);
-            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-            dataOutputStream.writeInt(listeningport);
-            int val = dataInputStream.readInt();
-            if (val==1)
-                System.out.println("connect to FileServer");
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private static void registertoFileServer2(int listeningport){
+    private static void registertoFileServer(int listeningport){
         try {
             DatagramSocket datagramSocket = new DatagramSocket(nodeInfo.NodePort);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();

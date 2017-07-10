@@ -1,8 +1,6 @@
 import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.ServerSocket;
-import java.net.Socket;
 import java.util.ArrayList;
 
 /**
@@ -10,8 +8,8 @@ import java.util.ArrayList;
  */
 public class RegisterThread extends Thread {
     public NodeInfo nodeInfo;
-    public byte[] buffer = new byte[213];
-    public ArrayList<Integer> arrayList = new ArrayList<>(); // 用来存储注册的各个StotageNode
+    public byte[] buffer = new byte[233];
+    public ArrayList<NodeInfo> arrayList = new ArrayList<>(); // 用来存储注册的各个StotageNode
     @Override
     public void run() {
             try {
@@ -27,7 +25,7 @@ public class RegisterThread extends Thread {
                                 ObjectInputStream ois = new ObjectInputStream(bais);
                                 try {
                                     NodeInfo nodeInfo = (NodeInfo) ois.readObject();
-                                    arrayList.add(nodeInfo.NodePort);
+                                    arrayList.add(nodeInfo);
                                     System.out.println(nodeInfo.NodePort+"已经注册到了FileServer");
                                 } catch (ClassNotFoundException e) {
                                     e.printStackTrace();

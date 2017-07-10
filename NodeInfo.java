@@ -12,6 +12,7 @@ public class NodeInfo implements Serializable{
     public String Volume;
     public String FileServerIP;
     public int FileServerPort;
+    public long starttime;
     public NodeInfo(Properties properties){
         NodeName = properties.getProperty("NodeName");
         NodeIP = properties.getProperty("NodeIP");
@@ -20,6 +21,7 @@ public class NodeInfo implements Serializable{
         Volume = properties.getProperty("Volume");
         FileServerIP = "127.0.0.1";
         FileServerPort = 2222;
+        starttime = System.currentTimeMillis();
     }
 
     @Override

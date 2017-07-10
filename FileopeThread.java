@@ -88,7 +88,7 @@ public class FileopeThread extends Thread {
         }
     }
 
-    private static String SLB(ArrayList<Integer> arrayList) {
+    private static String SLB(ArrayList<NodeInfo> arrayList) {
         System.out.println("目前的服务器台数量:");
         System.out.println(arrayList.size());
         Random random = new Random();
@@ -97,8 +97,8 @@ public class FileopeThread extends Thread {
         while (val2==val1){
             val2 = random.nextInt(arrayList.size());
         }
-        val1 = arrayList.get(val1);
-        val2 = arrayList.get(val2);
+        val1 = arrayList.get(val1).NodePort;
+        val2 = arrayList.get(val2).NodePort;
         System.out.println(val1+"&"+val2);
         return val1+"&"+val2;
     }
