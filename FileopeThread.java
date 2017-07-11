@@ -11,9 +11,9 @@ import java.util.UUID;
  */
 public class FileopeThread extends Thread {
     public static Hashtable<String,ItemFile> table = new Hashtable<>();
-    public static RegisterThread registerThread;
+    public static ArrayList<NodeInfo> arrayList;
     public FileopeThread(RegisterThread thread){
-        registerThread = thread;
+        arrayList = thread.arrayList;
     }
     @Override
     public void run() {
@@ -21,35 +21,40 @@ public class FileopeThread extends Thread {
             ServerSocket ss = new ServerSocket(3333); // 用来监听FileClient端的信息
             while (true){
                 Socket socket = ss.accept();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                            DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                            int command = dataInputStream.readInt();
-                            switch (command){
-                                case 0:
-                                    parseupload(dataInputStream,dataOutputStream);
-                                    socket.close();
-                                    break;
-                                case 1:
-                                    ObjectOutputStream objectOutputStream = new ObjectOutputStream(dataOutputStream);
-                                    parseupdownload(dataInputStream,objectOutputStream);
-                                    break;
-                                case 2:
-                                    ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(dataOutputStream);
-                                    parsedelete(dataInputStream,objectOutputStream1);
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+                startfileop(socket);
+//                socket.close();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void startfileop(Socket socket){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                    int command = dataInputStream.readInt();
+                    switch (command){
+                        case 0:
+                            parseupload(dataInputStream,dataOutputStream);
+//                            socket.close();
+                            break;
+                        case 1:
+                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(dataOutputStream);
+                            parseupdownload(dataInputStream,objectOutputStream);
+                            break;
+                        case 2:
+                            ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(dataOutputStream);
+                            parsedelete(dataInputStream,objectOutputStream1);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 
     private void parsedelete(DataInputStream dataInputStream, ObjectOutputStream dataOutputStream) {
@@ -73,7 +78,7 @@ public class FileopeThread extends Thread {
             String uuid = UUID.randomUUID().toString();
             long filelen = dataInputStream.readLong();
             System.out.println(filename+" "+filelen);
-            String vals = SLB(registerThread.arrayList);
+            String vals = SLB(arrayList);
             int val1 = Integer.parseInt(vals.substring(0,vals.indexOf("&")));
             int val2 = Integer.parseInt(vals.substring(vals.indexOf("&")+1,vals.length()));
             // 填表

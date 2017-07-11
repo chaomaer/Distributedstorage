@@ -28,17 +28,16 @@ public class FileClient {
                 switch (command) {
                     case "upload":
                         clientfun.upload(filename);
-                        socket.close();
+//                        socket.close();
                         break;
                     case "download":
                         clientfun.download(filename);
-                        socket.close();
+//                        socket.close();
                         break;
                     case "remove":
                         clientfun.remove(filename);
-                        socket.close();
+//                        socket.close();
                         break;
-
                 }
             } catch (Exception e) {
                 e.printStackTrace();

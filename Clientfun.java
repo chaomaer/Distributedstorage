@@ -15,13 +15,13 @@ public class Clientfun {
     public void upload(String filename) {
         try {
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-            Requestupload(new File(filename), socket);
+            RequestuploadtoFileSer(new File(filename), socket);
             String uuid = dataInputStream.readUTF();
             int port1 = dataInputStream.readInt();
             int port2 = dataInputStream.readInt();
             System.out.println(uuid + " port1:" + port1 + " port2:" + port2);
             Socket socket2 = new Socket(IP, port1);
-            UploadtoStorage(new File(filename), uuid, socket2, port2);
+            RequestUploadtoStorage(new File(filename), uuid, socket2, port2);
             System.out.println("文件存储结束");
             socket2.close();
         } catch (IOException e) {
@@ -30,7 +30,7 @@ public class Clientfun {
     }
 
     public void download(String filename) {
-        RequestDownload(filename, socket);
+        RequestDownloadFromFileSer(filename, socket);
         try {
             ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
             ItemFile itemFile = null;
@@ -41,14 +41,14 @@ public class Clientfun {
             }
             assert itemFile != null;
             System.out.println(itemFile.toString());
-            DownloadFromStorage(itemFile);
+            RequestDownloadFromStorage(itemFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
     public void remove(String filename) {
-        RequestDeleteFile(filename, socket);
+        RequestDeleteFileFromSer(filename, socket);
         ObjectInputStream objectInputStream1 = null;
         try {
             objectInputStream1 = new ObjectInputStream(socket.getInputStream());
@@ -59,45 +59,59 @@ public class Clientfun {
                 e.printStackTrace();
             }
             System.out.println(itemFile1.toString());
-            DeleterFromStorage(itemFile1);
+            RequestDeleterFromStorage(itemFile1);
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
 
-    public void Requestupload(File file, Socket socket) {
+    public void RequestuploadtoFileSer(File file, Socket socket) {
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeInt(0); //type 代表类型为上传文件
             dataOutputStream.writeUTF(file.getName());// file name
-            dataOutputStream.writeLong(file.length()); // file length
+            long len = getCandEfile(file); // 发送最终压缩和加密之后的文件大小
+            dataOutputStream.writeLong(len); // file length
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void UploadtoStorage(File file, String uuid, Socket socket, int port2) {
+    private long getCandEfile(File file) {
+        File file1 = Tool.getCompressFile(file);
+        File file2 = Tool.getEncryptfile(file1);
+        file1.delete();
+        long len = file2.length();
+        System.out.println("传上去的文件大小"+len);
+        file2.delete();
+        return len;
+    }
+
+    public void RequestUploadtoStorage(File file, String uuid, Socket socket, int port2) {
         DataOutputStream dataOutputStream = null;
         try {
+            File file1 = Tool.getCompressFile(file);
+            File file2 = Tool.getEncryptfile(file1);
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeInt(0); //类型为1代表文件发送到主节点，需要携带备份信息
             dataOutputStream.writeUTF(uuid);
-            dataOutputStream.writeLong(file.length());
-            FileInputStream fis = new FileInputStream(file);
+            dataOutputStream.writeLong(file2.length());
+            FileInputStream fis = new FileInputStream(file2);
             int line;
             while ((line = fis.read()) != -1) {
                 dataOutputStream.write(line);
             }
             dataOutputStream.writeInt(port2);  // 将备份的信息存到最后
             dataOutputStream.flush();
+            file1.delete();  // 将压缩文件和加密文件删除
+            file2.delete();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public void RequestDownload(String uuid, Socket socket) {
+    public void RequestDownloadFromFileSer(String uuid, Socket socket) {
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeInt(1); //type 代码类型为下载文件
@@ -108,10 +122,10 @@ public class Clientfun {
         }
     }
 
-    public void DownloadFromStorage(ItemFile itemFile) {
+    public void RequestDownloadFromStorage(ItemFile itemFile) {
         // 首先尝试到主服务器上下载文件
         try {
-            File file = new File(itemFile.filename);
+            File file = new File("temp.txt");
             Socket socket1 = new Socket(IP, itemFile.port1);
             DataOutputStream dataOutputStream = new DataOutputStream(socket1.getOutputStream());
             DataInputStream dataInputStream = new DataInputStream(socket1.getInputStream());
@@ -128,13 +142,20 @@ public class Clientfun {
                 fos.write(line);
                 sum++;
             }
+            System.out.println(file.length()+"文件的长度");
+            System.out.println("正在解压缩和解密...");
+            File file1 = Tool.getDecryptfile(file);
+            Tool.getDecompfile(file1,itemFile.filename);
+            file.delete();
+            file1.delete();
+            socket1.close();
             System.out.println("恭喜,文件下载结束");
         } catch (IOException e) {
             System.out.println("主服务器出现异常");
             System.out.println("尝试从备份服务器下载文件");
             // 如果发生异常，尝试从备份文件下载
             try {
-                File file = new File(itemFile.filename);
+                File file = new File("temp.txt");
                 Socket socket1 = new Socket(IP, itemFile.port2);
                 DataOutputStream dataOutputStream = new DataOutputStream(socket1.getOutputStream());
                 DataInputStream dataInputStream = new DataInputStream(socket1.getInputStream());
@@ -151,13 +172,20 @@ public class Clientfun {
                     fos.write(line);
                     sum++;
                 }
+                System.out.println(file.length()+"文件的长度");
+                System.out.println("正在解压缩和解密...");
+                File file1 = Tool.getDecryptfile(file);
+                Tool.getDecompfile(file1,itemFile.filename);
+                file.delete();
+                file1.delete();
+                socket1.close();
                 System.out.println("恭喜,文件下载结束");
             } catch (IOException e1) {
                 System.out.println("主节点和备份节点都出错:)");
             }
         }
     }
-    public void RequestDeleteFile(String uuid,Socket socket){
+    public void RequestDeleteFileFromSer(String uuid,Socket socket){
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeInt(2); //type 代表类型为删除文件
@@ -166,7 +194,7 @@ public class Clientfun {
             e.printStackTrace();
         }
     }
-    public void DeleterFromStorage(ItemFile itemFile){
+    public void RequestDeleterFromStorage(ItemFile itemFile){
         int port1 = itemFile.port1;
         int port2 = itemFile.port2;
         SenddeletetoStorage(itemFile.uuid,port1);

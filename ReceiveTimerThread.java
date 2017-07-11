@@ -9,12 +9,13 @@ import java.util.*;
  * Created by chaomaer on 7/9/17.
  */
 public class ReceiveTimerThread extends Thread {
-    public Timer timer = new Timer();
-    public ArrayList<NodeInfo> arrayList;
-    public static final long period = 1000*2*3;
+    private Timer timer = new Timer();
+    private ArrayList<NodeInfo> arrayList;
+    private static final long period = 1000*2*3;
     public ReceiveTimerThread(RegisterThread registerThread){
         arrayList = registerThread.arrayList;
     }
+    private byte [] buffer = new byte[32];
     @Override
     public void run() {
         try {
@@ -28,31 +29,33 @@ public class ReceiveTimerThread extends Thread {
                 }
             },0,period);
             while (true){
-                System.out.println("Hello,world");
-                byte [] buffer = new byte[32];
                 DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
                 socket.receive(packet);
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
-                        DataInputStream dis = new DataInputStream(bis);
-                        try {
-                            int portval = dis.readInt();
-                            for (NodeInfo nodeInfo : arrayList) {
-                                if (nodeInfo.NodePort == portval){
-                                    nodeInfo.starttime = System.currentTimeMillis();
-                                    break;
-                                }
-                            }
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }).start();
+                parsepacket();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void parsepacket() {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
+                DataInputStream dis = new DataInputStream(bis);
+                try {
+                    int portval = dis.readInt();
+                    for (NodeInfo nodeInfo : arrayList) {
+                        if (nodeInfo.NodePort == portval){
+                            nodeInfo.starttime = System.currentTimeMillis();
+                            break;
+                        }
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }).start();
     }
 }
