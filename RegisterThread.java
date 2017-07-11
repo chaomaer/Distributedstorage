@@ -2,14 +2,18 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by chaomaer on 7/6/17.
  */
 public class RegisterThread extends Thread {
-    private byte[] buffer = new byte[233];
-    public ArrayList<NodeInfo> arrayList = new ArrayList<>(); // 用来存储注册的各个StotageNode
-
+    public static final int NODEINFOSIZE = 233;
+    private byte[] buffer = new byte[NODEINFOSIZE];
+    public List<NodeInfo> arrayList;// 用来存储注册的各个StotageNode
+    public RegisterThread(List<NodeInfo> list){
+        this.arrayList = list;
+    }
     @Override
     public void run() {
         try {

@@ -1,19 +1,16 @@
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Created by chaomaer on 7/6/17.
  */
 public class FileopeThread extends Thread {
-    public static Hashtable<String,ItemFile> table = new Hashtable<>();
-    public static ArrayList<NodeInfo> arrayList;
-    public FileopeThread(RegisterThread thread){
-        arrayList = thread.arrayList;
+    public Hashtable<String,ItemFile> table = new Hashtable<>();
+    public List<NodeInfo> arrayList;
+    public FileopeThread(List<NodeInfo> list){
+        this.arrayList = list;
     }
     @Override
     public void run() {
@@ -71,7 +68,7 @@ public class FileopeThread extends Thread {
         }
     }
 
-    public static void parseupload(DataInputStream dataInputStream , DataOutputStream dataOutputStream){
+    private void parseupload(DataInputStream dataInputStream , DataOutputStream dataOutputStream){
         String filename = null;
         try {
             filename = dataInputStream.readUTF();
@@ -93,7 +90,7 @@ public class FileopeThread extends Thread {
         }
     }
 
-    private static String SLB(ArrayList<NodeInfo> arrayList) {
+    private String SLB(List<NodeInfo> arrayList) {
         System.out.println("目前的服务器台数量:");
         System.out.println(arrayList.size());
         Random random = new Random();

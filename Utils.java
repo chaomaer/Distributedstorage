@@ -147,7 +147,7 @@ public class Utils {
         }
     }
 
-    public static void FileBackup(DataInputStream dataInputStream) {
+    public static void FileBackup(String rootFolder, DataInputStream dataInputStream) {
         String filename = null;
         int port = -1;
         try {
@@ -155,7 +155,7 @@ public class Utils {
             System.out.println(filename);
             long len = dataInputStream.readLong();
             int line;
-            File file = new File(filename);
+            File file = new File(rootFolder,filename);
             FileOutputStream fos = new FileOutputStream(file);
             System.out.println("开始备份文件");
             long sum = 0;
@@ -171,7 +171,7 @@ public class Utils {
         }
     }
 
-    public static void StorageAndbackup(DataInputStream dataInputStream) {
+    public static void StorageAndbackup(String rootFolder, DataInputStream dataInputStream) {
         String filename = null;
         int port = -1;
         try {
@@ -179,7 +179,7 @@ public class Utils {
             System.out.println(filename);
             long len = dataInputStream.readLong();
             int line;
-            File file = new File(filename);
+            File file = new File(rootFolder,filename);
             FileOutputStream fos = new FileOutputStream(file);
             System.out.println("开始写入文件");
             long sum = 0;
@@ -193,17 +193,17 @@ public class Utils {
             port = dataInputStream.readInt();
             // 开始备份信息
             Socket socket1 = new Socket("127.0.0.1",port);
-            Utils.SendBackupfile(new File(filename),socket1);
+            Utils.SendBackupfile(new File(rootFolder,filename),socket1);
             socket1.close();
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public static void FileDownload(DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
+    public static void FileDownload(String rootFolder, DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
         try {
             String uuid = dataInputStream.readUTF();
-            File file = new File(uuid);
+            File file = new File(rootFolder,uuid);
             int line;
             dataOutputStream.writeLong(file.length());
             FileInputStream fis = new FileInputStream(file);

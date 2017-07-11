@@ -12,11 +12,16 @@ public class StorageNode {
     public static NodeInfo nodeInfo;
     public static int listeningport;
     public static Timer timer;
+    public static String rootFolder;
     //定时发送数据包的时间为2分钟
     public static final long period = 1000*2;
+    // 当程序退出的时候,需要向FileServer发送离开的信息包
+
     public static void main(String[] args) {
         readinitfile();
         listeningport = nodeInfo.NodePort;
+        rootFolder = nodeInfo.RootFolder;
+        initrootFolder();
         System.out.println("storageNode is ready in port "+listeningport);
         registertoFileServer(listeningport);
         // 2分钟向FileServer发送一次数据包
@@ -30,19 +35,19 @@ public class StorageNode {
                 int command = dataInputStream.readInt();
                 switch (command){
                     case 0://代表存储文件，同时发送备份文件
-                        Utils.StorageAndbackup(dataInputStream);
+                        Utils.StorageAndbackup(rootFolder,dataInputStream);
                         break;
                     case 1://代表为备份文件，需要在本主机进行备份
-                        Utils.FileBackup(dataInputStream);
+                        Utils.FileBackup(rootFolder,dataInputStream);
                         break;
                     case 2:
                         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                        Utils.FileDownload(dataInputStream,dataOutputStream);
+                        Utils.FileDownload(rootFolder,dataInputStream,dataOutputStream);
                         break;
                     case 3:
                         String filename = dataInputStream.readUTF();
                         System.out.println(filename);
-                        File file = new File(filename);
+                        File file = new File(rootFolder,filename);
                         file.delete();
                         break;
                 }
@@ -50,6 +55,11 @@ public class StorageNode {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void initrootFolder() {
+        File file = new File(rootFolder);
+        if (!file.exists()) file.mkdirs();
     }
 
     private static void startTimer() {

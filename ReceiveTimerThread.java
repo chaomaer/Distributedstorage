@@ -10,10 +10,10 @@ import java.util.*;
  */
 public class ReceiveTimerThread extends Thread {
     private Timer timer = new Timer();
-    private ArrayList<NodeInfo> arrayList;
+    private List<NodeInfo> arrayList;
     private static final long period = 1000*2*3;
-    public ReceiveTimerThread(RegisterThread registerThread){
-        arrayList = registerThread.arrayList;
+    public ReceiveTimerThread(List<NodeInfo> list){
+        this.arrayList = list;
     }
     private byte [] buffer = new byte[32];
     @Override
