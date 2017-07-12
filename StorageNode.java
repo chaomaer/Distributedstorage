@@ -22,6 +22,7 @@ public class StorageNode {
         listeningport = nodeInfo.nodePort;
         rootFolder = nodeInfo.rootFolder;
         initrootFolder();
+        System.out.println("初始化的StorageNode信息为"+nodeInfo);
         System.out.println("storageNode is ready in port "+listeningport);
         registertoFileServer(listeningport);
         // 2分钟向FileServer发送一次数据包
@@ -59,7 +60,40 @@ public class StorageNode {
 
     private static void initrootFolder() {
         File file = new File(rootFolder);
-        if (!file.exists()) file.mkdirs();
+        if (!file.exists()) {
+            file.mkdirs();
+            nodeInfo.setFilenum(0);
+            nodeInfo.setRemainVolume(nodeInfo.volume);
+        }else {
+            nodeInfo.setFilenum(file.list().length);
+            long sum = 0;
+            String[] files = file.list();
+            for (String s : files) {
+                file = new File(rootFolder,s);
+                sum += file.length();
+            }
+            System.out.println(sum+"sum");
+            nodeInfo.setRemainVolume(getRemainVolume(sum));
+        }
+
+    }
+
+    private static String getRemainVolume(long len) {
+        String s = nodeInfo.volume;
+        String ss;
+        float val;
+        if (s.substring(s.length()-2,s.length()).equals("GB")){
+            val = Float.parseFloat(s.substring(0,s.length()-2))*1024*1024*1024;
+        }else {
+            val = Float.parseFloat(s.substring(0,s.length()-2))*1024*1024;
+        }
+        val -= len;
+        if (val/(1024*1024*1024)>1){
+            ss = Float.toString(val/(1024*1024*1024))+"GB";
+        }else {
+            ss = Float.toString(val/(1024*1024))+"MB";
+        }
+        return ss;
     }
 
     private static void startTimer() {
@@ -104,7 +138,6 @@ public class StorageNode {
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(bos);
             objectOutputStream.writeObject(nodeInfo);
             byte[] buffer = bos.toByteArray();
-            System.out.println(buffer.length);
             System.out.println(buffer.length);
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),2222);
             datagramSocket.send(packet);

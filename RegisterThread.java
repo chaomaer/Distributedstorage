@@ -9,7 +9,7 @@ import java.util.List;
  * Created by chaomaer on 7/6/17.
  */
 public class RegisterThread extends Thread {
-    public static final int NODEINFOSIZE = 278;  // 此处有一些偷懒，理解为协议吧
+    public static final int NODEINFOSIZE = 1024;  // 此处有一些偷懒，理解为协议吧
     private byte[] buffer = new byte[NODEINFOSIZE];
     public Hashtable<Integer,NodeInfo> nodetable;// 用来存储注册的各个StotageNode
     public RegisterThread(Hashtable<Integer,NodeInfo> nodetable){
