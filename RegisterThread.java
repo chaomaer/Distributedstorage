@@ -2,17 +2,18 @@ import java.io.*;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.List;
 
 /**
  * Created by chaomaer on 7/6/17.
  */
 public class RegisterThread extends Thread {
-    public static final int NODEINFOSIZE = 233;
+    public static final int NODEINFOSIZE = 278;  // 此处有一些偷懒，理解为协议吧
     private byte[] buffer = new byte[NODEINFOSIZE];
-    public List<NodeInfo> arrayList;// 用来存储注册的各个StotageNode
-    public RegisterThread(List<NodeInfo> list){
-        this.arrayList = list;
+    public Hashtable<Integer,NodeInfo> nodetable;// 用来存储注册的各个StotageNode
+    public RegisterThread(Hashtable<Integer,NodeInfo> nodetable){
+        this.nodetable = nodetable;
     }
     @Override
     public void run() {
@@ -38,8 +39,10 @@ public class RegisterThread extends Thread {
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     try {
                         NodeInfo nodeInfo = (NodeInfo) ois.readObject();
-                        arrayList.add(nodeInfo);
-                        System.out.println(nodeInfo.NodePort + "已经注册到了FileServer");
+                        int port = nodeInfo.nodePort;
+                        nodetable.put(port,nodeInfo);
+                        System.out.println(nodeInfo.nodePort + "注册到了FileServer");
+                        System.out.println(nodeInfo.toString());
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }

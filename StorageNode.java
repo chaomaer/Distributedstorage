@@ -14,13 +14,13 @@ public class StorageNode {
     public static Timer timer;
     public static String rootFolder;
     //定时发送数据包的时间为2分钟
-    public static final long period = 1000*2;
+    public static final long period = 1000*60*2;
     // 当程序退出的时候,需要向FileServer发送离开的信息包
 
     public static void main(String[] args) {
         readinitfile();
-        listeningport = nodeInfo.NodePort;
-        rootFolder = nodeInfo.RootFolder;
+        listeningport = nodeInfo.nodePort;
+        rootFolder = nodeInfo.rootFolder;
         initrootFolder();
         System.out.println("storageNode is ready in port "+listeningport);
         registertoFileServer(listeningport);
@@ -99,7 +99,7 @@ public class StorageNode {
     }
     private static void registertoFileServer(int listeningport){
         try {
-            DatagramSocket datagramSocket = new DatagramSocket(nodeInfo.NodePort);
+            DatagramSocket datagramSocket = new DatagramSocket(nodeInfo.nodePort);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
             ObjectOutputStream objectOutputStream = new ObjectOutputStream(bos);
             objectOutputStream.writeObject(nodeInfo);

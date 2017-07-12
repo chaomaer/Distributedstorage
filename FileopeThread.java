@@ -7,11 +7,15 @@ import java.util.*;
  * Created by chaomaer on 7/6/17.
  */
 public class FileopeThread extends Thread {
-    public Hashtable<String,ItemFile> table = new Hashtable<>();
-    public List<NodeInfo> arrayList;
-    public FileopeThread(List<NodeInfo> list){
-        this.arrayList = list;
+    public Hashtable<String,ItemFile> filetable = new Hashtable<>();
+    public Hashtable<Integer,NodeInfo> nodetable;
+
+    public FileopeThread(Hashtable<Integer, NodeInfo> nodetable, Hashtable<String, ItemFile> filetable) {
+        this.filetable = filetable;
+        this.nodetable = nodetable;
     }
+
+
     @Override
     public void run() {
         try {
@@ -61,7 +65,7 @@ public class FileopeThread extends Thread {
     private void parseupdownload(DataInputStream dataInputStream, ObjectOutputStream objectOutputStream) {
         try {
             String key = dataInputStream.readUTF();
-            objectOutputStream.writeObject(table.get(key));
+            objectOutputStream.writeObject(filetable.get(key));
             objectOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,11 +79,11 @@ public class FileopeThread extends Thread {
             String uuid = UUID.randomUUID().toString();
             long filelen = dataInputStream.readLong();
             System.out.println(filename+" "+filelen);
-            String vals = SLB(arrayList);
+            String vals = SLB(nodetable);
             int val1 = Integer.parseInt(vals.substring(0,vals.indexOf("&")));
             int val2 = Integer.parseInt(vals.substring(vals.indexOf("&")+1,vals.length()));
             // 填表
-            table.put(uuid,new ItemFile(uuid,filename,filelen,val1,val2));
+            filetable.put(uuid,new ItemFile(uuid,filename,filelen,val1,val2));
             dataOutputStream.writeUTF(uuid);
             dataOutputStream.writeInt(val1);
             dataOutputStream.writeInt(val2);
@@ -90,7 +94,12 @@ public class FileopeThread extends Thread {
         }
     }
 
-    private String SLB(List<NodeInfo> arrayList) {
+    private String SLB(Hashtable<Integer,NodeInfo> table) {
+        ArrayList<NodeInfo> arrayList = new ArrayList<>();
+        for (Integer integer : table.keySet()) {
+            NodeInfo nodeInfo = table.get(integer);
+            if (nodeInfo.canUse) arrayList.add(nodeInfo);
+        }
         System.out.println("目前的服务器台数量:");
         System.out.println(arrayList.size());
         Random random = new Random();
@@ -99,8 +108,8 @@ public class FileopeThread extends Thread {
         while (val2==val1){
             val2 = random.nextInt(arrayList.size());
         }
-        val1 = arrayList.get(val1).NodePort;
-        val2 = arrayList.get(val2).NodePort;
+        val1 = arrayList.get(val1).nodePort;
+        val2 = arrayList.get(val2).nodePort;
         System.out.println(val1+"&"+val2);
         return val1+"&"+val2;
     }
