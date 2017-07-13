@@ -164,10 +164,10 @@ public class FileopeThread extends Thread {
             DatagramSocket socket = new DatagramSocket();
             ByteArrayOutputStream bos = new ByteArrayOutputStream(1024*1024);
             ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(nodetable.get(val));
             byte[] buffer = bos.toByteArray();
             // 端口6666负责接受NodeMonitor的显示工作
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),6667);
-            oos.writeObject(nodetable.get(val));
             socket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
