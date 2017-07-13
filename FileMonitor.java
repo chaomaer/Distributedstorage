@@ -6,13 +6,15 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 /**
  * Created by chaomaer on 7/12/17.
  */
 public class FileMonitor extends JFrame {
-
+    public  static ArrayList<String> tablearrayList = new ArrayList<>();
+    // 是一个数据表的索引,非常之重要,数据的更细,删除都是由它进行
     public  static DefaultTableModel tableModel;   //表格模型对象
     public  static JTable table;
     public FileMonitor()
@@ -32,20 +34,27 @@ public class FileMonitor extends JFrame {
         // 以上部分都为废话，就是为了写一个丑陋的GUI
     }
     public static void main(String[] args) {
-        HashMap<String,Integer> fileHashMap = new HashMap<>();
-        int index = 0;  // 是一个数据表的索引,非常之重要,数据的更细,删除都是由它进行
-        // TODO Auto-generated method stub
         FileMonitor fileMonitor = new FileMonitor();
         fileMonitor.setVisible(true);
-        String [] res = {"a","b","c","d","e"};
         startmonitor();
-        fileMonitor.tableModel.addRow(res);
-        try {
-            Thread.sleep(3000);
-            fileMonitor.tableModel.setValueAt("dfajsdfajsdfjjasdfjajs",0,0);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // 用于测试
+//        String[] res = {"a","b","c","d","e"};
+//        String[] res1 = {"1","b","c","d","e"};
+//        String[] res2 = {"2","b","c","d","e"};
+//        String[] res3 = {"3","b","c","d","e"};
+//        tableModel.addRow(res);
+//        tableModel.addRow(res1);
+//        tableModel.addRow(res2);
+//        tableModel.addRow(res3);
+//        try {
+//            Thread.sleep(2000);
+//            for (int i = 0; i < 4; i++) {
+//                tableModel.removeRow(0);
+//                Thread.sleep(1000);
+//            }
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
     }
 
     private static void startmonitor() {
@@ -58,7 +67,6 @@ public class FileMonitor extends JFrame {
                     while (true){
                         DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
                         socket.receive(packet);
-                        System.out.println("收到的长度为"+packet.getLength());
                         ByteArrayInputStream bis = new ByteArrayInputStream(buffer);
                         ObjectInputStream ois = new ObjectInputStream(bis);
                         try {
@@ -82,6 +90,25 @@ public class FileMonitor extends JFrame {
         ss[2] = itemFile.filelen+"";
         ss[3] = itemFile.port1+"";
         ss[4] = itemFile.port2+"";
-        tableModel.addRow(ss);
+        // 在展示之前看看是要修改，增加，还是删除
+        ArrayList<String> arrayList = tablearrayList ; // 第一个代表port，第二个代表索引
+        if (!arrayList.contains(ss[0])){ // 增加
+            tableModel.addRow(ss);
+            arrayList.add(ss[0]);
+            System.out.println(ss[0]);
+        }else{ //删除
+            int index = 0;
+            for (int i = 0; i < arrayList.size(); i++) {
+                if (arrayList.get(i).equals(ss[0])){
+                    index = i;
+                    break;
+                }
+            }
+            arrayList.remove(index);
+            tableModel.removeRow(index);
+        }
+        for (int i = 0; i < arrayList.size(); i++) {
+            System.out.println(i+" "+arrayList.get(i));
+        }
     }
 }
