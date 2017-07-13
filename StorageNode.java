@@ -16,8 +16,14 @@ public class StorageNode {
     //定时发送数据包的时间为2分钟
     public static final long period = 1000*60*2;
     // 当程序退出的时候,需要向FileServer发送离开的信息包
-
     public static void main(String[] args) {
+        Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendpacket(-1,listeningport);
+                System.out.println("发送了一个断开连接连接数据包");
+            }
+        }));
         readinitfile();
         listeningport = nodeInfo.nodePort;
         rootFolder = nodeInfo.rootFolder;
@@ -101,22 +107,28 @@ public class StorageNode {
         timer.scheduleAtFixedRate(new TimerTask() {
             @Override
             public void run() {
-                try {
-                    DatagramSocket datagramSocket = new DatagramSocket(listeningport);
-                    ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                    DataOutputStream dos = new DataOutputStream(bos);
-                    dos.writeInt(listeningport);
-                    byte[] buffer = bos.toByteArray();
-                    DatagramPacket packet = new DatagramPacket(buffer,buffer.length,
-                            InetAddress.getLocalHost(),9999);
-                    datagramSocket.send(packet);
+                    sendpacket(0,listeningport);
                     System.out.println("发送了一个确认连接数据包");
-                    datagramSocket.close();
-                } catch (IOException e) {
-                    e.printStackTrace();
                 }
-            }
         },new Date(System.currentTimeMillis()+period),period);
+    }
+
+    private static void sendpacket(int type, int listeningport) {
+        DatagramSocket datagramSocket = null;
+        try {
+            datagramSocket = new DatagramSocket(listeningport);
+            ByteArrayOutputStream bos = new ByteArrayOutputStream();
+            DataOutputStream dos = new DataOutputStream(bos);
+            dos.writeInt(listeningport);
+            dos.writeInt(type); //代表为正常的确认数据包
+            byte[] buffer = bos.toByteArray();
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length,
+                    InetAddress.getLocalHost(),9999);
+            datagramSocket.send(packet);
+            datagramSocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private static void readinitfile() {

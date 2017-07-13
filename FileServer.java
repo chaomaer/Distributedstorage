@@ -8,7 +8,7 @@ import java.util.List;
  */
 public class FileServer {
     public static void main(String[] args) {
-        Hashtable<Integer,NodeInfo> nodetable = new Hashtable<>();        // FileServer最重要的一个变量,用来记录StrageNode中的信息
+        Hashtable<Integer,NodeInfo> nodetable = new Hashtable<>(); // FileServer最重要的一个变量,用来记录StrageNode中的信息
         // 使这个容器的操作变为atom操作
         Hashtable<String,ItemFile> filetable = new Hashtable<>();  //文件表,所有的文件信息都在这个table中进行存储
         // hashtable 本身就是线程安全的

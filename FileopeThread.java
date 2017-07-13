@@ -1,6 +1,5 @@
 import java.io.*;
-import java.net.ServerSocket;
-import java.net.Socket;
+import java.net.*;
 import java.util.*;
 
 /**
@@ -77,6 +76,11 @@ public class FileopeThread extends Thread {
             changeVolume(0,val2,itemFile.filelen);
             dataOutputStream.writeObject(itemFile);
             dataOutputStream.flush();
+            sendtoNodeMonitor(val1);
+            sendtoNodeMonitor(val2);
+            sendtoFileMonitor(key);
+            // 同时删除在FileServer中的记录
+            filetable.remove(key);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -114,7 +118,42 @@ public class FileopeThread extends Thread {
             dataOutputStream.writeInt(val1);
             dataOutputStream.writeInt(val2);
             dataOutputStream.flush();
+            //分别发送消息到两个监听器
+            sendtoNodeMonitor(val1);
+            sendtoNodeMonitor(val2);
+            sendtoFileMonitor(uuid);
             System.out.println("发送消息到FileClient端\n");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendtoFileMonitor(String uuid) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1024*1024);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(filetable.get(uuid));
+            byte[] buffer = bos.toByteArray();
+            // 端口6666负责接受NodeMonitor的显示工作
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),6666);
+            socket.send(packet);
+            System.out.println("Packet"+packet.getLength());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendtoNodeMonitor(int val) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1024*1024);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            byte[] buffer = bos.toByteArray();
+            // 端口6666负责接受NodeMonitor的显示工作
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),6667);
+            oos.writeObject(nodetable.get(val));
+            socket.send(packet);
         } catch (IOException e) {
             e.printStackTrace();
         }

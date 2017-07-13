@@ -11,6 +11,7 @@ import java.util.List;
 public class RegisterThread extends Thread {
     public static final int NODEINFOSIZE = 1024;  // 此处有一些偷懒，理解为协议吧
     private byte[] buffer = new byte[NODEINFOSIZE];
+    private static final long period = 1000*60*5;
     public Hashtable<Integer,NodeInfo> nodetable;// 用来存储注册的各个StotageNode
     public RegisterThread(Hashtable<Integer,NodeInfo> nodetable){
         this.nodetable = nodetable;
@@ -43,11 +44,28 @@ public class RegisterThread extends Thread {
                         nodetable.put(port,nodeInfo);
                         System.out.println(nodeInfo.nodePort + "注册到了FileServer");
                         System.out.println(nodeInfo.toString());
+                        // 每次注册的时候，为这个NodeStorage增加定时器
+                        settimer(nodeInfo);
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();
+                }
+            }
+        }).start();
+    }
+
+    private void settimer(NodeInfo nodeInfo) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (true){
+                    if (nodeInfo.canUse&&System.currentTimeMillis()-nodeInfo.starttime>period){
+                        nodeInfo.canUse = false;
+                        break;
+                    }
+                    if (!nodeInfo.canUse) break;  // 防止其他线程进行修改
                 }
             }
         }).start();
