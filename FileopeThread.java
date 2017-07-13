@@ -47,13 +47,11 @@ public class FileopeThread extends Thread {
                             break;
                         case 1:
                             // 文件下载，没有影响
-                            ObjectOutputStream objectOutputStream = new ObjectOutputStream(dataOutputStream);
-                            parseupdownload(dataInputStream,objectOutputStream);
+                            parseupdownload(dataInputStream,dataOutputStream);
                             break;
                         case 2:
                             // 文件删除,这需要进行对FileServer,StorageNode的值进行修改
-                            ObjectOutputStream objectOutputStream1 = new ObjectOutputStream(dataOutputStream);
-                            parsedelete(dataInputStream,objectOutputStream1);
+                            parsedelete(dataInputStream,dataOutputStream);
                             printFiletable();
                             printNodetable();
                     }
@@ -64,9 +62,14 @@ public class FileopeThread extends Thread {
         }).start();
     }
 
-    private void parsedelete(DataInputStream dataInputStream, ObjectOutputStream dataOutputStream) {
+    private void parsedelete(DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
         try {
             String key = dataInputStream.readUTF();
+            if (!filetable.containsKey(key)){
+                dataOutputStream.writeInt(0);
+                dataOutputStream.flush();
+                return;
+            }
             ItemFile itemFile = filetable.get(key);
             int val1 = itemFile.port1;
             int val2 = itemFile.port2;
@@ -74,7 +77,9 @@ public class FileopeThread extends Thread {
             nodetable.get(val2).filenum--;
             changeVolume(0,val1,itemFile.filelen);
             changeVolume(0,val2,itemFile.filelen);
-            dataOutputStream.writeObject(itemFile);
+            dataOutputStream.writeInt(1);
+            ObjectOutputStream objectOutput = new ObjectOutputStream(dataOutputStream);
+            objectOutput.writeObject(itemFile);
             dataOutputStream.flush();
             sendtoNodeMonitor(val1);
             sendtoNodeMonitor(val2);
@@ -86,11 +91,21 @@ public class FileopeThread extends Thread {
         }
     }
 
-    private void parseupdownload(DataInputStream dataInputStream, ObjectOutputStream objectOutputStream) {
+    private void parseupdownload(DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
+        boolean flag;
         try {
+            System.out.println(dataOutputStream.size());
             String key = dataInputStream.readUTF();
-            objectOutputStream.writeObject(filetable.get(key));
-            objectOutputStream.flush();
+            flag = filetable.containsKey(key);
+            if (flag){
+                dataOutputStream.writeInt(1);
+                ObjectOutputStream objectOutputStream = new ObjectOutputStream(dataOutputStream);
+                objectOutputStream.writeObject(filetable.get(key));
+                objectOutputStream.flush();
+            }else {
+                dataOutputStream.writeInt(0); // 代表没有这个文件  //太迷了.....
+                dataOutputStream.flush();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -163,7 +178,7 @@ public class FileopeThread extends Thread {
         String s = nodetable.get(val1).remainVolume;
         String ss;
         float val ;
-        if (s.substring(s.length()-2,s.length()) == "GB"){
+        if (s.substring(s.length()-2,s.length()) .equals("GB")){
             val = Float.parseFloat(s.substring(0,s.length()-2))*1024*1024*1024;
         }else {
             val = Float.parseFloat(s.substring(0,s.length()-2))*1024*1024;

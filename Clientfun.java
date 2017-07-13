@@ -14,6 +14,12 @@ public class Clientfun {
 
     public void upload(String filename) {
         try {
+            // 首先检查文件的合法性
+            File file = new File(filename);
+            if (!file.exists()) {
+                System.out.println("文件不存在!");
+                return;
+            }
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             RequestuploadtoFileSer(new File(filename), socket);
             String uuid = dataInputStream.readUTF();
@@ -32,9 +38,15 @@ public class Clientfun {
     public void download(String filename) {
         RequestDownloadFromFileSer(filename, socket);
         try {
-            ObjectInputStream objectInputStream = new ObjectInputStream(socket.getInputStream());
+            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             ItemFile itemFile = null;
+            int val = dataInputStream.readInt();
+            if (val == 0){
+                System.out.println("要下载的文件不存在");
+                return;
+            }
             try {
+                ObjectInputStream objectInputStream = new ObjectInputStream(dataInputStream);
                 itemFile = (ItemFile) objectInputStream.readObject();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
@@ -51,9 +63,15 @@ public class Clientfun {
         RequestDeleteFileFromSer(filename, socket);
         ObjectInputStream objectInputStream1 = null;
         try {
-            objectInputStream1 = new ObjectInputStream(socket.getInputStream());
+            DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
+            int val = dataInputStream.readInt();
+            if (val==0){
+                System.out.println("要删除的文件不存在");
+                return;
+            }
             ItemFile itemFile1 = null;
             try {
+                objectInputStream1 = new ObjectInputStream(dataInputStream);
                 itemFile1 = (ItemFile) objectInputStream1.readObject();
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
