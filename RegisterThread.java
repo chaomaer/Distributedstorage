@@ -63,6 +63,7 @@ public class RegisterThread extends Thread {
                 while (true){
                     if (nodeInfo.canUse&&System.currentTimeMillis()-nodeInfo.starttime>period){
                         nodeInfo.canUse = false;
+                        Utils.sendtoNodeMonitor(nodeInfo);
                         break;
                     }
                     if (!nodeInfo.canUse) break;  // 防止其他线程进行修改

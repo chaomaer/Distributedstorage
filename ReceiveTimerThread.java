@@ -41,6 +41,7 @@ public class ReceiveTimerThread extends Thread {
                     if (command == -1){
                         System.out.println("服务器"+portval+"停止运行");
                         nodetable.get(portval).canUse = false;
+                        Utils.sendtoNodeMonitor(nodetable.get(portval));
                     }else {
                         for (Integer integer : nodetable.keySet()) {
                             NodeInfo nodeInfo = nodetable.get(integer);

@@ -154,6 +154,7 @@ public class StorageNode {
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),2222);
             datagramSocket.send(packet);
             datagramSocket.close();
+            Utils.sendtoNodeMonitor(nodeInfo);
         } catch (IOException e) {
             e.printStackTrace();
         }

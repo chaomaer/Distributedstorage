@@ -41,8 +41,6 @@ public class FileopeThread extends Thread {
                         case 0:
                             // 代表上传文件，这需要进行对FileServer,StorageNode的值进行修改
                             parseupload(dataInputStream,dataOutputStream);
-                            printFiletable();
-                            printNodetable();
 //                            socket.close();
                             break;
                         case 1:

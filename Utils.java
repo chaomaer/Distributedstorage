@@ -1,4 +1,7 @@
 import java.io.*;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.util.zip.Deflater;
 
@@ -251,5 +254,35 @@ public class Utils {
         byte[] result = new byte[len];
         System.arraycopy(output, 0, result, 0, len);
         return result;
+    }
+    public static void sendtoFileMonitor(ItemFile itemFile) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1024*1024);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(itemFile);
+            byte[] buffer = bos.toByteArray();
+            // 端口6666负责接受NodeMonitor的显示工作
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length, InetAddress.getLocalHost(),6666);
+            socket.send(packet);
+            System.out.println("Packet"+packet.getLength());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void sendtoNodeMonitor(NodeInfo nodeInfo) {
+        try {
+            DatagramSocket socket = new DatagramSocket();
+            ByteArrayOutputStream bos = new ByteArrayOutputStream(1024*1024);
+            ObjectOutputStream oos = new ObjectOutputStream(bos);
+            oos.writeObject(nodeInfo);
+            byte[] buffer = bos.toByteArray();
+            // 端口6666负责接受NodeMonitor的显示工作
+            DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),6667);
+            socket.send(packet);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
