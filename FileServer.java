@@ -73,7 +73,6 @@ public class FileServer {
                     oos.writeUTF("over");
                     for (Integer integer : nodetable.keySet()) {
                         oos.writeInt(integer);
-                        nodetable.get(integer).canUse = false;
                         oos.writeObject(nodetable.get(integer));
                     }
                     oos.writeInt(0);

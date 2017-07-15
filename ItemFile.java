@@ -9,6 +9,7 @@ public class ItemFile implements Serializable{
     public long filelen;
     public int port1;
     public int port2;
+    public boolean istransfer;
 
     public ItemFile(String uuid, String filename, long filelen, int port1, int port2) {
         this.uuid = uuid;
@@ -16,6 +17,7 @@ public class ItemFile implements Serializable{
         this.filelen = filelen;
         this.port1 = port1;
         this.port2 = port2;
+        this.istransfer = false;
     }
 
     @Override

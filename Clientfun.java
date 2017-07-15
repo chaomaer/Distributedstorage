@@ -157,8 +157,54 @@ public class Clientfun {
             System.out.println("正在下载文件中........");
             while (sum != filelen) {
                 line = dataInputStream.read();
+                if (line == -1){
+                    System.out.println("读取完毕");
+                    break;
+                }
                 fos.write(line);
                 sum++;
+//                System.out.println("Hello world");
+            }
+            if (sum != filelen ){
+                System.out.println("文件下载中断.....");
+                downloadfromBack(itemFile);
+            }else {
+                System.out.println(file.length()+"文件的长度");
+                System.out.println("正在解压缩和解密...");
+                File file1 = Tool.getDecryptfile(file);
+                Tool.getDecompfile(file1,itemFile.filename);
+                file.delete();
+                file1.delete();
+                socket1.close();
+                System.out.println("恭喜,文件下载结束");
+            }
+        } catch (IOException e) {
+                downloadfromBack(itemFile);
+        }
+    }
+
+    private void downloadfromBack(ItemFile itemFile) {
+        System.out.println("主服务器出现异常");
+        System.out.println("尝试从备份服务器下载文件");
+        // 如果发生异常，尝试从备份文件下载
+        try {
+            File file = new File("temp.txt");
+            Socket socket1 = new Socket(IP, itemFile.port2);
+            DataOutputStream dataOutputStream = new DataOutputStream(socket1.getOutputStream());
+            DataInputStream dataInputStream = new DataInputStream(socket1.getInputStream());
+            dataOutputStream.writeInt(2);  //代表要下载文件
+            dataOutputStream.writeUTF(itemFile.uuid);
+            dataOutputStream.flush();
+            FileOutputStream fos = new FileOutputStream(file);
+            long filelen = dataInputStream.readLong();
+            long sum = 0;
+            int line;
+            System.out.println("正在下载文件中........");
+            while (sum != filelen) {
+                line = dataInputStream.read();
+                fos.write(line);
+                sum++;
+
             }
             System.out.println(file.length()+"文件的长度");
             System.out.println("正在解压缩和解密...");
@@ -168,41 +214,11 @@ public class Clientfun {
             file1.delete();
             socket1.close();
             System.out.println("恭喜,文件下载结束");
-        } catch (IOException e) {
-            System.out.println("主服务器出现异常");
-            System.out.println("尝试从备份服务器下载文件");
-            // 如果发生异常，尝试从备份文件下载
-            try {
-                File file = new File("temp.txt");
-                Socket socket1 = new Socket(IP, itemFile.port2);
-                DataOutputStream dataOutputStream = new DataOutputStream(socket1.getOutputStream());
-                DataInputStream dataInputStream = new DataInputStream(socket1.getInputStream());
-                dataOutputStream.writeInt(2);  //代表要下载文件
-                dataOutputStream.writeUTF(itemFile.uuid);
-                dataOutputStream.flush();
-                FileOutputStream fos = new FileOutputStream(file);
-                long filelen = dataInputStream.readLong();
-                long sum = 0;
-                int line;
-                System.out.println("正在下载文件中........");
-                while (sum != filelen) {
-                    line = dataInputStream.read();
-                    fos.write(line);
-                    sum++;
-                }
-                System.out.println(file.length()+"文件的长度");
-                System.out.println("正在解压缩和解密...");
-                File file1 = Tool.getDecryptfile(file);
-                Tool.getDecompfile(file1,itemFile.filename);
-                file.delete();
-                file1.delete();
-                socket1.close();
-                System.out.println("恭喜,文件下载结束");
-            } catch (IOException e1) {
-                System.out.println("主节点和备份节点都出错:)");
-            }
+        } catch (IOException e1) {
+            System.out.println("主节点和备份节点都出错:)");
         }
     }
+
     public void RequestDeleteFileFromSer(String uuid,Socket socket){
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());

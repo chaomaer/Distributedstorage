@@ -13,6 +13,7 @@ public class StorageNode {
     public static int listeningport;
     public static Timer timer;
     public static String rootFolder;
+    public static boolean istransfer;
     //定时发送数据包的时间为2分钟
     public static final long period = 1000*60*2;
     // 当程序退出的时候,需要向FileServer发送离开的信息包
@@ -20,7 +21,10 @@ public class StorageNode {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
             @Override
             public void run() {
-                sendpacket(-1,listeningport);
+                if (istransfer)
+                    sendpacket(-1,listeningport);
+                else
+                    sendpacket(1,listeningport);
                 System.out.println("发送了一个断开连接连接数据包");
             }
         }));
@@ -49,7 +53,9 @@ public class StorageNode {
                         break;
                     case 2:
                         DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                        istransfer = true;
                         Utils.FileDownload(rootFolder,dataInputStream,dataOutputStream);
+                        istransfer = false;
                         break;
                     case 3:
                         String filename = dataInputStream.readUTF();
@@ -115,6 +121,9 @@ public class StorageNode {
 
     private static void sendpacket(int type, int listeningport) {
         DatagramSocket datagramSocket = null;
+//            case -1:// 断开连接
+//            case 0: // 确认信息包
+//            case 1: // 断开连接并下载文件中断
         try {
             datagramSocket = new DatagramSocket(listeningport);
             ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -134,7 +143,7 @@ public class StorageNode {
     private static void readinitfile() {
         try {
             Properties properties = new Properties();
-            FileInputStream fis = new FileInputStream(new File("storage*.properties"));
+            FileInputStream fis = new FileInputStream(new File("storage.properties"));
             properties.load(fis);
             nodeInfo = new NodeInfo(properties);
         } catch (IOException e) {
