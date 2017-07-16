@@ -10,7 +10,7 @@ import java.util.zip.Deflater;
  */
 public class Utils {
     public static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
-    private static byte[] buffer = new byte[1024*1024];
+    private static byte[] buffer = new byte[256];
     // 用来发送文件信息到FileServer
     public static void Requestupload(File file, Socket socket) {
         try {
@@ -209,9 +209,6 @@ public class Utils {
             while ((line = fis.read(buffer))!=-1){
                 dataOutputStream.write(buffer,0,line);
             }
-            System.out.println("阿拉啦啦啦啦");
-            System.out.println("*********************");
-            System.out.println(dataOutputStream.size()+"阿拉啦啦啦啦");
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();

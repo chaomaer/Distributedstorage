@@ -169,14 +169,13 @@ public class Clientfun {
             int a = 0;
             while ((sum = dataInputStream.read(buffer))!=-1){
                 a += sum;
-                System.out.println(sum);
                 fos.write(buffer,0,sum);
                 fos.flush();
                 if (a == filelen) break;
             }
             System.out.println("a"+a);
             if (file.length()!=filelen){
-                System.out.println("文件下载中断.....");
+                System.out.println("文件下载中断");
                 downloadfromBack(itemFile);
             }else {
                 System.out.println(file.length()+"文件的长度");
@@ -208,10 +207,13 @@ public class Clientfun {
             FileOutputStream fos = new FileOutputStream(file);
             long filelen = dataInputStream.readLong();
             int sum = 0;
-            int line;
             System.out.println("正在下载文件中........");
+            int a = 0;
             while ((sum = dataInputStream.read(buffer))!=-1){
+                a += sum;
                 fos.write(buffer,0,sum);
+                fos.flush();
+                if (a == filelen) break;
             }
             System.out.println(file.length()+"文件的长度");
             System.out.println("正在解压缩和解密...");
@@ -221,6 +223,7 @@ public class Clientfun {
             file1.delete();
             socket1.close();
             System.out.println("恭喜,文件下载结束");
+            System.out.println("我是从备份文件下载下来的");
         } catch (IOException e1) {
             System.out.println("主节点和备份节点都出错:)");
         }

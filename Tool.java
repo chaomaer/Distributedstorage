@@ -21,7 +21,7 @@ public class Tool {
             + "B6579537065635B470B66E230614D0200024C0009616C676F726974686D7400124C6A6176612F6C616E672F53747"
             + "2696E673B5B00036B65797400025B427870740003414553757200025B42ACF317F8060854E002000078700000001"
             + "05F226F6452F56B28FEB96947587F6787";
-    private static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
+    private static final int MAX_BUFFER_SIZE = 100 * 1024 * 1024;
     private static final String TEMPCOMPRESSFILE = "tempcom.txt";
     private static final String TEMPENCRYPTFILE = "tempenc.txt";
     private static final String TEMPEDCRYPTFILE = "tempdecry.txt";
@@ -174,6 +174,7 @@ public class Tool {
                     bytes = buffer;
                 }
                 byte [] res = Tool.compress(bytes);
+                System.out.println(count+"---"+res.length);
                 dataOutputStream.writeInt(res.length);
                 dataOutputStream.write(res);
             }
@@ -248,8 +249,11 @@ public class Tool {
             int line;
             while ((line = dis.readInt())!=0){
                 byte[] bytes = new byte[line];
-                dis.read(bytes);
-                fos.write(Tool.decompress(bytes));
+                int sum = dis.read(bytes);
+                byte[] res = Tool.decompress(bytes);
+                assert res != null;
+                System.out.println(line+"---"+sum);
+                fos.write(res);
             }
         } catch (IOException e) {
             e.printStackTrace();
