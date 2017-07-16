@@ -15,7 +15,7 @@ public class StorageNode {
     public static String rootFolder;
     public static boolean istransfer;
     //定时发送数据包的时间为2分钟
-    public static final long period = 1000*60*2;
+    public static final long period1 = 1000*3;
     // 当程序退出的时候,需要向FileServer发送离开的信息包
     public static void main(String[] args) {
         Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
@@ -41,29 +41,38 @@ public class StorageNode {
             ServerSocket serverSocket = new ServerSocket(listeningport);
             while (true){
                 Socket socket = serverSocket.accept();
-                String ss;
-                DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-                int command = dataInputStream.readInt();
-                switch (command){
-                    case 0://代表存储文件，同时发送备份文件
-                        Utils.StorageAndbackup(rootFolder,dataInputStream);
-                        break;
-                    case 1://代表为备份文件，需要在本主机进行备份
-                        Utils.FileBackup(rootFolder,dataInputStream);
-                        break;
-                    case 2:
-                        DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                        istransfer = true;
-                        Utils.FileDownload(rootFolder,dataInputStream,dataOutputStream);
-                        istransfer = false;
-                        break;
-                    case 3:
-                        String filename = dataInputStream.readUTF();
-                        System.out.println(filename);
-                        File file = new File(rootFolder,filename);
-                        file.delete();
-                        break;
-                }
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        DataInputStream dataInputStream = null;
+                        try {
+                            dataInputStream = new DataInputStream(socket.getInputStream());
+                            int command = dataInputStream.readInt();
+                            switch (command){
+                                case 0://代表存储文件，同时发送备份文件
+                                    Utils.StorageAndbackup(rootFolder,dataInputStream);
+                                    break;
+                                case 1://代表为备份文件，需要在本主机进行备份
+                                    Utils.FileBackup(rootFolder,dataInputStream);
+                                    break;
+                                case 2:
+                                    DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
+                                    istransfer = true;
+                                    Utils.FileDownload(rootFolder,dataInputStream,dataOutputStream);
+                                    istransfer = false;
+                                    break;
+                                case 3:
+                                    String filename = dataInputStream.readUTF();
+                                    System.out.println(filename);
+                                    File file = new File(rootFolder,filename);
+                                    file.delete();
+                                    break;
+                            }
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -116,7 +125,7 @@ public class StorageNode {
                     sendpacket(0,listeningport);
                     System.out.println("发送了一个确认连接数据包");
                 }
-        },new Date(System.currentTimeMillis()+period),period);
+        },new Date(System.currentTimeMillis()+period1),period1);
     }
 
     private static void sendpacket(int type, int listeningport) {

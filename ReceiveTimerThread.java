@@ -21,7 +21,6 @@ public class ReceiveTimerThread extends Thread {
             while (true){
                 DatagramPacket packet = new DatagramPacket(buffer,buffer.length);
                 socket.receive(packet);
-                System.out.println("数据包的长度"+packet.getLength());
                 parsepacket();
             }
         } catch (IOException e) {
@@ -47,6 +46,7 @@ public class ReceiveTimerThread extends Thread {
                             NodeInfo nodeInfo = nodetable.get(integer);
                             if (nodeInfo.nodePort == portval){
                                 nodeInfo.starttime = System.currentTimeMillis();
+                                System.out.println("最近更新时间"+nodeInfo.starttime);
                                 break;
                             }
                         }

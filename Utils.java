@@ -10,6 +10,7 @@ import java.util.zip.Deflater;
  */
 public class Utils {
     public static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
+    private static byte[] buffer = new byte[1024*1024];
     // 用来发送文件信息到FileServer
     public static void Requestupload(File file, Socket socket) {
         try {
@@ -141,8 +142,8 @@ public class Utils {
             dataOutputStream.writeLong(file.length());
             FileInputStream fis = new FileInputStream(file);
             int line;
-            while ((line = fis.read()) != -1) {
-                dataOutputStream.write(line);
+            while ((line = fis.read(buffer)) != -1) {
+                dataOutputStream.write(buffer,0,line);
             }
             dataOutputStream.flush();
         } catch (IOException e) {
@@ -161,12 +162,9 @@ public class Utils {
             File file = new File(rootFolder,filename);
             FileOutputStream fos = new FileOutputStream(file);
             System.out.println("开始备份文件");
-            long sum = 0;
-            while (true) {
-                line = dataInputStream.read();
-                sum++;
-                fos.write(line);
-                if (sum == len) break;
+            int sum = 0;
+            while ((sum = dataInputStream.read(buffer))!=-1){
+                fos.write(buffer,0,sum);
             }
             System.out.println("备份文件结束");
         } catch (IOException e) {
@@ -181,19 +179,17 @@ public class Utils {
             filename = dataInputStream.readUTF();
             System.out.println(filename);
             long len = dataInputStream.readLong();
-            int line;
             File file = new File(rootFolder,filename);
             FileOutputStream fos = new FileOutputStream(file);
             System.out.println("开始写入文件");
-            long sum = 0;
-            while (true) {
-                line = dataInputStream.read();
-                sum++;
-                fos.write(line);
-                if (sum == len) break;
-            }
-            System.out.println("开始写入文件");
             port = dataInputStream.readInt();
+            System.out.println("对应的port"+port);
+            int sum = 0;
+            while ((sum = dataInputStream.read(buffer))!=-1){
+                fos.write(buffer,0,sum);
+            }
+            System.out.println("写入文件完成...");
+            System.out.println("开始写入备份文件...");
             // 开始备份信息
             Socket socket1 = new Socket("127.0.0.1",port);
             Utils.SendBackupfile(new File(rootFolder,filename),socket1);
@@ -210,14 +206,16 @@ public class Utils {
             int line;
             dataOutputStream.writeLong(file.length());
             FileInputStream fis = new FileInputStream(file);
-            while ((line = fis.read())!=-1){
-                dataOutputStream.write(line);
+            while ((line = fis.read(buffer))!=-1){
+                dataOutputStream.write(buffer,0,line);
             }
+            System.out.println("阿拉啦啦啦啦");
+            System.out.println("*********************");
+            System.out.println(dataOutputStream.size()+"阿拉啦啦啦啦");
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
     public static long getcofilelen(File file){
         FileInputStream fis = null;

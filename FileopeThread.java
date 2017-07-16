@@ -120,21 +120,25 @@ public class FileopeThread extends Thread {
             int val1 = Integer.parseInt(vals.substring(0,vals.indexOf("&")));
             int val2 = Integer.parseInt(vals.substring(vals.indexOf("&")+1,vals.length()));
             // 填表
-            filetable.put(uuid,new ItemFile(uuid,filename,filelen,val1,val2));
-            // 文件数量+1;
-            // 对应的存储容量
-            changeVolume(1,val1,filelen);
-            changeVolume(1,val2,filelen);
-            nodetable.get(val1).filenum++;
-            nodetable.get(val2).filenum++;
-            dataOutputStream.writeUTF(uuid);
-            dataOutputStream.writeInt(val1);
-            dataOutputStream.writeInt(val2);
-            dataOutputStream.flush();
-            //分别发送消息到两个监听器
-            sendtoNodeMonitor(val1);
-            sendtoNodeMonitor(val2);
-            sendtoFileMonitor(uuid);
+            if (val1==0){
+                dataOutputStream.writeUTF("empty");
+            }else {
+                filetable.put(uuid,new ItemFile(uuid,filename,filelen,val1,val2));
+                // 文件数量+1;
+                // 对应的存储容量
+                changeVolume(1,val1,filelen);
+                changeVolume(1,val2,filelen);
+                nodetable.get(val1).filenum++;
+                nodetable.get(val2).filenum++;
+                dataOutputStream.writeUTF(uuid);
+                dataOutputStream.writeInt(val1);
+                dataOutputStream.writeInt(val2);
+                dataOutputStream.flush();
+                //分别发送消息到两个监听器
+                sendtoNodeMonitor(val1);
+                sendtoNodeMonitor(val2);
+                sendtoFileMonitor(uuid);
+            }
             System.out.println("发送消息到FileClient端\n");
         } catch (IOException e) {
             e.printStackTrace();
@@ -205,6 +209,9 @@ public class FileopeThread extends Thread {
         }
         System.out.println("目前的服务器台数量:");
         System.out.println(arrayList.size());
+        if (arrayList.size()<=1){
+            return "0&0";
+        }
         Random random = new Random();
         int val1 = random.nextInt(arrayList.size());
         int val2 = random.nextInt(arrayList.size());

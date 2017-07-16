@@ -7,6 +7,7 @@ import java.net.Socket;
 public class Clientfun {
     private Socket socket;
     private static final String IP = "127.0.0.1";
+    private byte[] buffer = new byte[1024*1024];
 
     public Clientfun(Socket socket) {
         this.socket = socket;
@@ -23,13 +24,17 @@ public class Clientfun {
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
             RequestuploadtoFileSer(new File(filename), socket);
             String uuid = dataInputStream.readUTF();
-            int port1 = dataInputStream.readInt();
-            int port2 = dataInputStream.readInt();
-            System.out.println(uuid + " port1:" + port1 + " port2:" + port2);
-            Socket socket2 = new Socket(IP, port1);
-            RequestUploadtoStorage(new File(filename), uuid, socket2, port2);
-            System.out.println("文件存储结束");
-            socket2.close();
+            if (uuid.equals("empty")){
+                System.out.println("存储服务器出现异常");
+            }else{
+                int port1 = dataInputStream.readInt();
+                int port2 = dataInputStream.readInt();
+                System.out.println(uuid + " port1:" + port1 + " port2:" + port2);
+                Socket socket2 = new Socket(IP, port1);
+                RequestUploadtoStorage(new File(filename), uuid, socket2, port2);
+                System.out.println("文件存储结束");
+                socket2.close();
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,13 +120,18 @@ public class Clientfun {
             dataOutputStream.writeInt(0); //类型为1代表文件发送到主节点，需要携带备份信息
             dataOutputStream.writeUTF(uuid);
             dataOutputStream.writeLong(file2.length());
+            dataOutputStream.writeInt(port2);
             FileInputStream fis = new FileInputStream(file2);
             int line;
-            while ((line = fis.read()) != -1) {
-                dataOutputStream.write(line);
+            System.out.println("文件正在上传中.....");
+            long time1 = System.currentTimeMillis();
+            while ((line = fis.read(buffer)) != -1) {
+                dataOutputStream.write(buffer,0,line);
             }
-            dataOutputStream.writeInt(port2);  // 将备份的信息存到最后
+            long time2 = System.currentTimeMillis();
+            System.out.println("用时间"+(time2-time1));
             dataOutputStream.flush();
+            System.out.println("文件结束");
             file1.delete();  // 将压缩文件和加密文件删除
             file2.delete();
         } catch (IOException e) {
@@ -151,21 +161,21 @@ public class Clientfun {
             dataOutputStream.writeUTF(itemFile.uuid);
             dataOutputStream.flush();
             FileOutputStream fos = new FileOutputStream(file);
+            System.out.println("阿拉啦啦啦啦");
             long filelen = dataInputStream.readLong();
-            long sum = 0;
+            int sum = 0;
             int line;
             System.out.println("正在下载文件中........");
-            while (sum != filelen) {
-                line = dataInputStream.read();
-                if (line == -1){
-                    System.out.println("读取完毕");
-                    break;
-                }
-                fos.write(line);
-                sum++;
-//                System.out.println("Hello world");
+            int a = 0;
+            while ((sum = dataInputStream.read(buffer))!=-1){
+                a += sum;
+                System.out.println(sum);
+                fos.write(buffer,0,sum);
+                fos.flush();
+                if (a == filelen) break;
             }
-            if (sum != filelen ){
+            System.out.println("a"+a);
+            if (file.length()!=filelen){
                 System.out.println("文件下载中断.....");
                 downloadfromBack(itemFile);
             }else {
@@ -197,14 +207,11 @@ public class Clientfun {
             dataOutputStream.flush();
             FileOutputStream fos = new FileOutputStream(file);
             long filelen = dataInputStream.readLong();
-            long sum = 0;
+            int sum = 0;
             int line;
             System.out.println("正在下载文件中........");
-            while (sum != filelen) {
-                line = dataInputStream.read();
-                fos.write(line);
-                sum++;
-
+            while ((sum = dataInputStream.read(buffer))!=-1){
+                fos.write(buffer,0,sum);
             }
             System.out.println(file.length()+"文件的长度");
             System.out.println("正在解压缩和解密...");

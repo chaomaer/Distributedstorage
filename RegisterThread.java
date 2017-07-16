@@ -11,7 +11,7 @@ import java.util.List;
 public class RegisterThread extends Thread {
     public static final int NODEINFOSIZE = 1024;  // 此处有一些偷懒，理解为协议吧
     private byte[] buffer = new byte[NODEINFOSIZE];
-    private static final long period = 1000*60*5;
+    private static final long period2 = 1000*10;
     public Hashtable<Integer,NodeInfo> nodetable;// 用来存储注册的各个StotageNode
     public RegisterThread(Hashtable<Integer,NodeInfo> nodetable){
         this.nodetable = nodetable;
@@ -40,6 +40,7 @@ public class RegisterThread extends Thread {
                     ObjectInputStream ois = new ObjectInputStream(bais);
                     try {
                         NodeInfo nodeInfo = (NodeInfo) ois.readObject();
+                        System.out.println(nodeInfo.starttime);
                         int port = nodeInfo.nodePort;
                         nodetable.put(port,nodeInfo);
                         System.out.println(nodeInfo.nodePort + "注册到了FileServer");
@@ -61,9 +62,14 @@ public class RegisterThread extends Thread {
             @Override
             public void run() {
                 while (true){
-                    if (nodeInfo.canUse&&System.currentTimeMillis()-nodeInfo.starttime>period){
+                    long time = System.currentTimeMillis();
+                    if (nodeInfo.canUse&&(time-nodeInfo.starttime)>period2){
+                        System.out.println("");
+                    } // 谜一样的判断
+                    if (nodeInfo.canUse&&(time-nodeInfo.starttime)>period2){
                         nodeInfo.canUse = false;
                         Utils.sendtoNodeMonitor(nodeInfo);
+                        System.out.println("超时--------------------------------------------------------------");
                         break;
                     }
                     if (!nodeInfo.canUse) break;  // 防止其他线程进行修改
