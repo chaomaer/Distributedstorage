@@ -9,7 +9,6 @@ import java.util.zip.Deflater;
  * Created by chaomaer on 7/6/17.
  */
 public class Utils {
-    public static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
     private static byte[] buffer = new byte[256];
     // 用来发送文件信息到FileServer
     public static void Requestupload(File file, Socket socket) {
@@ -210,45 +209,11 @@ public class Utils {
                 dataOutputStream.write(buffer,0,line);
             }
             dataOutputStream.flush();
+            System.out.println("写入的长度是"+dataOutputStream.size());
+            System.out.println("运行的线程是"+Thread.currentThread().getName());
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-    public static long getcofilelen(File file){
-        FileInputStream fis = null;
-        byte[] buffer = new byte[MAX_BUFFER_SIZE];
-        long sum = 0;
-        try {
-            fis = new FileInputStream(file);
-            int line;
-            byte[] bytes;
-            while ((line = fis.read(buffer))!=-1){
-                bytes = new byte[line];
-                for (int i = 0; i < line; i++) {
-                    bytes[i] = buffer[i];
-                }
-                byte[] res = compress(bytes);
-                sum += res.length+4;
-            }
-            sum +=4;
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return sum;
-    }
-    public static byte[] compress(byte[] input) {
-        byte[] output = new byte[MAX_BUFFER_SIZE];
-        Deflater compresser = new Deflater(Deflater.BEST_COMPRESSION, true);
-
-        compresser.setInput(input);
-        compresser.finish();
-
-        int len = compresser.deflate(output);
-        compresser.end();
-
-        byte[] result = new byte[len];
-        System.arraycopy(output, 0, result, 0, len);
-        return result;
     }
     public static void sendtoFileMonitor(ItemFile itemFile) {
         try {
@@ -280,4 +245,5 @@ public class Utils {
             e.printStackTrace();
         }
     }
+
 }

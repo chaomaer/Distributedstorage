@@ -123,7 +123,7 @@ public class StorageNode {
             @Override
             public void run() {
                     sendpacket(0,listeningport);
-                    System.out.println("发送了一个确认连接数据包");
+//                    System.out.println("发送了一个确认连接数据包");
                 }
         },new Date(System.currentTimeMillis()+period1),period1);
     }

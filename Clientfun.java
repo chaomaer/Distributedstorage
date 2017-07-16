@@ -22,7 +22,7 @@ public class Clientfun {
                 return;
             }
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-            RequestuploadtoFileSer(new File(filename), socket);
+            File file1 = RequestuploadtoFileSer(new File(filename), socket);
             String uuid = dataInputStream.readUTF();
             if (uuid.equals("empty")){
                 System.out.println("存储服务器出现异常");
@@ -31,7 +31,7 @@ public class Clientfun {
                 int port2 = dataInputStream.readInt();
                 System.out.println(uuid + " port1:" + port1 + " port2:" + port2);
                 Socket socket2 = new Socket(IP, port1);
-                RequestUploadtoStorage(new File(filename), uuid, socket2, port2);
+                RequestUploadtoStorage(file1, uuid, socket2, port2);
                 System.out.println("文件存储结束");
                 socket2.close();
             }
@@ -88,52 +88,51 @@ public class Clientfun {
         }
     }
 
-    public void RequestuploadtoFileSer(File file, Socket socket) {
+    public File RequestuploadtoFileSer(File file, Socket socket) {
+        File file1 = null;
         try {
             DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeInt(0); //type 代表类型为上传文件
             dataOutputStream.writeUTF(file.getName());// file name
-            long len = getCandEfile(file); // 发送最终压缩和加密之后的文件大小
-            dataOutputStream.writeLong(len); // file length
+            file1 = getCandEfile(file); // 发送最终压缩和加密之后的文件大小
+            dataOutputStream.writeLong(file1.length()); // file length
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
         }
+        return file1;
     }
 
-    private long getCandEfile(File file) {
-        File file1 = Tool.getCompressFile(file);
+    private File getCandEfile(File file) {
+        File file1 = ZipUtil.zip(file.getName());
         File file2 = Tool.getEncryptfile(file1);
         file1.delete();
         long len = file2.length();
         System.out.println("传上去的文件大小"+len);
-        file2.delete();
-        return len;
+        return file2;
     }
 
     public void RequestUploadtoStorage(File file, String uuid, Socket socket, int port2) {
         DataOutputStream dataOutputStream = null;
         try {
-            File file1 = Tool.getCompressFile(file);
-            File file2 = Tool.getEncryptfile(file1);
             dataOutputStream = new DataOutputStream(socket.getOutputStream());
             dataOutputStream.writeInt(0); //类型为1代表文件发送到主节点，需要携带备份信息
             dataOutputStream.writeUTF(uuid);
-            dataOutputStream.writeLong(file2.length());
+            dataOutputStream.writeLong(file.length());
             dataOutputStream.writeInt(port2);
-            FileInputStream fis = new FileInputStream(file2);
+            FileInputStream fis = new FileInputStream(file);
             int line;
-            System.out.println("文件正在上传中.....");
+            System.out.println("文件正在上传");
             long time1 = System.currentTimeMillis();
             while ((line = fis.read(buffer)) != -1) {
                 dataOutputStream.write(buffer,0,line);
+                System.out.println("上传中...");
             }
             long time2 = System.currentTimeMillis();
             System.out.println("用时间"+(time2-time1));
             dataOutputStream.flush();
             System.out.println("文件结束");
-            file1.delete();  // 将压缩文件和加密文件删除
-            file2.delete();
+            file.delete();  // 将压缩文件和加密文件删除
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -180,10 +179,11 @@ public class Clientfun {
             }else {
                 System.out.println(file.length()+"文件的长度");
                 System.out.println("正在解压缩和解密...");
+                System.out.println(file.length()+"*******************");
                 File file1 = Tool.getDecryptfile(file);
-                Tool.getDecompfile(file1,itemFile.filename);
+                ZipUtil.unzip(file1.getName(),itemFile.filename);
                 file.delete();
-                file1.delete();
+//                file1.delete();
                 socket1.close();
                 System.out.println("恭喜,文件下载结束");
             }
@@ -218,7 +218,7 @@ public class Clientfun {
             System.out.println(file.length()+"文件的长度");
             System.out.println("正在解压缩和解密...");
             File file1 = Tool.getDecryptfile(file);
-            Tool.getDecompfile(file1,itemFile.filename);
+            ZipUtil.unzip(file1.getName(),itemFile.filename);
             file.delete();
             file1.delete();
             socket1.close();
