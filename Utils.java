@@ -68,7 +68,6 @@ public class Utils {
                 fos.write(buffer, 0, sum);
             }
             System.out.println("写入文件完成...");
-            System.out.println("开始写入备份文件...");
             // 开始备份信息
             Socket socket1 = new Socket("127.0.0.1", port);
             Utils.SendBackupfile(new File(rootFolder, filename), socket1);
@@ -106,7 +105,6 @@ public class Utils {
             // 端口6666负责接受NodeMonitor的显示工作
             DatagramPacket packet = new DatagramPacket(buffer, buffer.length, InetAddress.getLocalHost(), 6666);
             socket.send(packet);
-            System.out.println("Packet" + packet.getLength());
         } catch (IOException e) {
             e.printStackTrace();
         }

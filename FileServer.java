@@ -64,10 +64,12 @@ public class FileServer {
                 // 先保存file信息
                 try {
                     ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file));
+                    System.out.println("filetable"+filetable.size());
                     for (String s : filetable.keySet()) {
                         oos.writeUTF(s);
                         oos.writeObject(filetable.get(s));
                     }
+                    System.out.println("nodetable"+nodetable.size());
                     oos.writeUTF("over");
                     for (Integer integer : nodetable.keySet()) {
                         oos.writeInt(integer);

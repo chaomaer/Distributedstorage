@@ -153,7 +153,6 @@ public class FileopeThread extends Thread {
             // 端口6666负责接受NodeMonitor的显示工作
             DatagramPacket packet = new DatagramPacket(buffer,buffer.length,InetAddress.getLocalHost(),6666);
             socket.send(packet);
-            System.out.println("Packet"+packet.getLength());
         } catch (IOException e) {
             e.printStackTrace();
         }

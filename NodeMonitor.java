@@ -25,7 +25,12 @@ public class NodeMonitor extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         String[] columnNames = {"名称","ip","端口","实际容量","剩余量","文件数量","是否可用"};   //列名
         tableModel = new DefaultTableModel(null,columnNames);
-        table = new JTable(tableModel);
+        table = new JTable(tableModel){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
         JScrollPane scrollPane = new JScrollPane(table);   //支持滚动
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         scrollPane.setViewportView(table);
@@ -65,7 +70,7 @@ public class NodeMonitor extends JFrame {
             }
         }).start();
     }
-    private static void display(NodeInfo nodeInfo) {
+    synchronized private static void display(NodeInfo nodeInfo) {
         String[] ss = new String[7];
         ss[0] = nodeInfo.nodeName;
         ss[1] = nodeInfo.nodeIP;

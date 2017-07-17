@@ -44,7 +44,6 @@ public class RegisterThread extends Thread {
                         int port = nodeInfo.nodePort;
                         nodetable.put(port,nodeInfo);
                         System.out.println(nodeInfo.nodePort + "注册到了FileServer");
-                        System.out.println(nodeInfo.toString());
                         // 每次注册的时候，为这个NodeStorage增加定时器
                         settimer(nodeInfo);
                     } catch (ClassNotFoundException e) {
@@ -71,7 +70,7 @@ public class RegisterThread extends Thread {
                         Utils.sendtoNodeMonitor(nodeInfo);
                         System.out.println(time-nodeInfo.starttime);
                         System.out.println(period2);
-                        System.out.println("超时--------------------------------------------------------------");
+                        System.out.println(nodeInfo.nodePort+"--------超时-------");
                         break;
                     }
                     if (!nodeInfo.canUse) break;  // 防止其他线程进行修改

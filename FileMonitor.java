@@ -17,6 +17,7 @@ public class FileMonitor extends JFrame {
     // 是一个数据表的索引,非常之重要,数据的更细,删除都是由它进行
     public  static DefaultTableModel tableModel;   //表格模型对象
     public  static JTable table;
+    public  static JScrollPane scrollPane;
     public FileMonitor()
     {
         super();
@@ -25,8 +26,13 @@ public class FileMonitor extends JFrame {
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         String[] columnNames = {"编号","文件原始名称","文件大小","主存储节点信息","备份节点信息"};   //列名
         tableModel = new DefaultTableModel(null,columnNames);
-        table = new JTable(tableModel);
-        JScrollPane scrollPane = new JScrollPane(table);   //支持滚动
+        table = new JTable(tableModel){
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        scrollPane = new JScrollPane(table);   //支持滚动
         getContentPane().add(scrollPane, BorderLayout.CENTER);
         scrollPane.setViewportView(table);
         final JPanel panel = new JPanel();
@@ -65,7 +71,7 @@ public class FileMonitor extends JFrame {
             }
         }).start();
     }
-    private static void display(ItemFile itemFile) {
+    synchronized private static void display(ItemFile itemFile) {
         String[] ss = new String[5];
         ss[0] = itemFile.uuid;
         ss[1] = itemFile.filename;
@@ -77,20 +83,23 @@ public class FileMonitor extends JFrame {
         if (!arrayList.contains(ss[0])){ // 增加
             tableModel.addRow(ss);
             arrayList.add(ss[0]);
-            System.out.println(ss[0]);
+            System.out.println("UUID"+"------------>"+ss[0]);
         }else{ //删除
-            int index = 0;
+            int index = -1;
             for (int i = 0; i < arrayList.size(); i++) {
                 if (arrayList.get(i).equals(ss[0])){
                     index = i;
+                    arrayList.remove(index);
+                    tableModel.removeRow(index);
                     break;
                 }
             }
-            arrayList.remove(index);
-            tableModel.removeRow(index);
+            if (index == -1) System.out.println("NOT FIND");
+
         }
         for (int i = 0; i < arrayList.size(); i++) {
             System.out.println(i+" "+arrayList.get(i));
         }
+        scrollPane.invalidate();
     }
 }

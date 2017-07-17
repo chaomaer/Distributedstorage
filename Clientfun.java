@@ -57,7 +57,6 @@ public class Clientfun {
                 e.printStackTrace();
             }
             assert itemFile != null;
-            System.out.println(itemFile.toString());
             RequestDownloadFromStorage(itemFile);
         } catch (IOException e) {
             e.printStackTrace();
@@ -128,7 +127,7 @@ public class Clientfun {
                 dataOutputStream.write(buffer,0,line);
             }
             long time2 = System.currentTimeMillis();
-            System.out.println("用时间"+(time2-time1));
+            System.out.println("用时间"+((time2-time1)/1000)+"s");
             dataOutputStream.flush();
             System.out.println("文件结束");
             file.delete();  // 将压缩文件和加密文件删除
@@ -159,10 +158,8 @@ public class Clientfun {
             dataOutputStream.writeUTF(itemFile.uuid);
             dataOutputStream.flush();
             FileOutputStream fos = new FileOutputStream(file);
-            System.out.println("阿拉啦啦啦啦");
             long filelen = dataInputStream.readLong();
             int sum = 0;
-            int line;
             System.out.println("正在下载文件中........");
             int a = 0;
             while ((sum = dataInputStream.read(buffer))!=-1){
