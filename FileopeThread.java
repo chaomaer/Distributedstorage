@@ -50,11 +50,9 @@ public class FileopeThread extends Thread {
                         case 2:
                             // 文件删除,这需要进行对FileServer,StorageNode的值进行修改
                             parsedelete(dataInputStream,dataOutputStream);
-                            printFiletable();
-                            printNodetable();
                     }
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    System.out.println();
                 }
             }
         }).start();

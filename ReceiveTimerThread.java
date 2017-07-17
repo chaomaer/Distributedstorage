@@ -46,7 +46,6 @@ public class ReceiveTimerThread extends Thread {
                             NodeInfo nodeInfo = nodetable.get(integer);
                             if (nodeInfo.nodePort == portval){
                                 nodeInfo.starttime = System.currentTimeMillis();
-                                System.out.println("最近更新时间"+nodeInfo.starttime);
                                 break;
                             }
                         }

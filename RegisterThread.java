@@ -11,7 +11,7 @@ import java.util.List;
 public class RegisterThread extends Thread {
     public static final int NODEINFOSIZE = 1024;  // 此处有一些偷懒，理解为协议吧
     private byte[] buffer = new byte[NODEINFOSIZE];
-    private static final long period2 = 1000*10;
+    private static final long period2 = 1000*20;
     public Hashtable<Integer,NodeInfo> nodetable;// 用来存储注册的各个StotageNode
     public RegisterThread(Hashtable<Integer,NodeInfo> nodetable){
         this.nodetable = nodetable;
@@ -69,6 +69,8 @@ public class RegisterThread extends Thread {
                     if (nodeInfo.canUse&&(time-nodeInfo.starttime)>period2){
                         nodeInfo.canUse = false;
                         Utils.sendtoNodeMonitor(nodeInfo);
+                        System.out.println(time-nodeInfo.starttime);
+                        System.out.println(period2);
                         System.out.println("超时--------------------------------------------------------------");
                         break;
                     }

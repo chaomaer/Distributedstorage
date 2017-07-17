@@ -24,7 +24,6 @@ public class FileServer {
                 String ss;
                 while (!(ss = ois.readUTF()).equals("over")){
                     try {
-                        System.out.println(ss);
                         ItemFile itemFile = (ItemFile) ois.readObject();
                         filetable.put(ss, itemFile);
                         Utils.sendtoFileMonitor(itemFile);
@@ -37,7 +36,6 @@ public class FileServer {
                     try {
                         NodeInfo nodeInfo = (NodeInfo) ois.readObject();
                         nodetable.put(port, nodeInfo);
-                        System.out.println(port+"---"+nodeInfo);
                         Utils.sendtoNodeMonitor(nodeInfo);
                     } catch (ClassNotFoundException e) {
                         e.printStackTrace();
