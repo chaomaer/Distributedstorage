@@ -198,7 +198,7 @@ public class Utils {
         }
     }
 
-    public static void FileDownload(String rootFolder, DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
+    synchronized public static void FileDownload(String rootFolder, DataInputStream dataInputStream, DataOutputStream dataOutputStream) {
         try {
             String uuid = dataInputStream.readUTF();
             File file = new File(rootFolder,uuid);

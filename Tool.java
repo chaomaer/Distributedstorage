@@ -22,7 +22,11 @@ public class Tool {
             + "B6579537065635B470B66E230614D0200024C0009616C676F726974686D7400124C6A6176612F6C616E672F53747"
             + "2696E673B5B00036B65797400025B427870740003414553757200025B42ACF317F8060854E002000078700000001"
             + "05F226F6452F56B28FEB96947587F6787";
-    private static final int   MAX_BUFFER_SIZE =    1024;
+    private static final int MAX_BUFFER_SIZE = 16 * 1024 * 1024;
+    private static final String TEMPCOMPRESSFILE = "tempcom.txt";
+    private static final String TEMPENCRYPTFILE = "tempenc.txt";
+    private static final String TEMPEDCRYPTFILE = "tempdecry.txt";
+    private static final String TEMPEDCOMPRTFILE = "tempdecom.txt";
     private static final byte[] buffer = new byte[MAX_BUFFER_SIZE];
     public static byte[] convertHexToByteArray(String hexString) {
         if (hexString == null || hexString.length() == 0) {
@@ -152,7 +156,7 @@ public class Tool {
         }
     }
     public static File getCompressFile(File file){
-        return getCompressFile(file,UUID.randomUUID().toString());
+        return getCompressFile(file,TEMPCOMPRESSFILE);
     }
     public static File getCompressFile(File file,String filename){
         File file1 = new File(filename);
@@ -171,7 +175,6 @@ public class Tool {
                     bytes = buffer;
                 }
                 byte [] res = Tool.compress(bytes);
-                System.out.println(count+"---"+res.length);
                 dataOutputStream.writeInt(res.length);
                 dataOutputStream.write(res);
             }
@@ -183,14 +186,14 @@ public class Tool {
         return file1;
     }
     public static File getEncryptfile(File file){
-        return getEncryptfile(file,UUID.randomUUID().toString());
+        return getEncryptfile(file,TEMPENCRYPTFILE);
     }
     public static File getEncryptfile(File file,String filename){
         FileInputStream fis = null;
         File file1 = new File(filename);
         try {
             fis = new FileInputStream(file);
-            DataOutputStream dos = new DataOutputStream(new FileOutputStream(UUID.randomUUID().toString()));
+            DataOutputStream dos = new DataOutputStream(new FileOutputStream(TEMPENCRYPTFILE));
             int line;
             byte[] bytes;
             while ((line = fis.read(buffer)) != -1){
@@ -214,11 +217,11 @@ public class Tool {
         return file1;
     }
     public static File getDecryptfile(File file){
-        return getDecryptfile(file,UUID.randomUUID().toString());
+        return getDecryptfile(file, UUID.randomUUID().toString());
     }
     public static File getDecryptfile(File file,String filename){
         DataInputStream dis = null;
-        File file1 = new File(UUID.randomUUID().toString());
+        File file1 = new File(filename);
         try {
             dis = new DataInputStream(new FileInputStream(file));
             FileOutputStream fos = new FileOutputStream(file1);
@@ -235,7 +238,7 @@ public class Tool {
         return file1;
     }
     public static File getDecompfile(File file){
-        return getDecompfile(file,UUID.randomUUID().toString());
+        return getDecompfile(file,TEMPEDCOMPRTFILE);
     }
     public static File getDecompfile(File file,String filename){
         DataInputStream dis = null;

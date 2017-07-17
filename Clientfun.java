@@ -126,7 +126,6 @@ public class Clientfun {
             long time1 = System.currentTimeMillis();
             while ((line = fis.read(buffer)) != -1) {
                 dataOutputStream.write(buffer,0,line);
-                System.out.println("上传中...");
             }
             long time2 = System.currentTimeMillis();
             System.out.println("用时间"+(time2-time1));
@@ -179,11 +178,10 @@ public class Clientfun {
             }else {
                 System.out.println(file.length()+"文件的长度");
                 System.out.println("正在解压缩和解密...");
-                System.out.println(file.length()+"*******************");
                 File file1 = Tool.getDecryptfile(file);
                 ZipUtil.unzip(file1.getName(),itemFile.filename);
                 file.delete();
-//                file1.delete();
+                file1.delete();
                 socket1.close();
                 System.out.println("恭喜,文件下载结束");
             }

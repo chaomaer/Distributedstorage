@@ -44,6 +44,7 @@ public class StorageNode {
                 new Thread(new Runnable() {
                     @Override
                     public void run() {
+                        System.out.println("socket"+socket.getInetAddress());
                         DataInputStream dataInputStream = null;
                         try {
                             dataInputStream = new DataInputStream(socket.getInputStream());
@@ -57,9 +58,7 @@ public class StorageNode {
                                     break;
                                 case 2:
                                     DataOutputStream dataOutputStream = new DataOutputStream(socket.getOutputStream());
-                                    istransfer = true;
                                     Utils.FileDownload(rootFolder,dataInputStream,dataOutputStream);
-                                    istransfer = false;
                                     break;
                                 case 3:
                                     String filename = dataInputStream.readUTF();
