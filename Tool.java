@@ -210,6 +210,8 @@ public class Tool {
                 dos.write(res);
             }
             dos.writeInt(0);
+            fis.close();
+            dos.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

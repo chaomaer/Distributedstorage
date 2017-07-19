@@ -24,6 +24,7 @@ public class Utils {
             while ((line = fis.read(buffer)) != -1) {
                 dataOutputStream.write(buffer, 0, line);
             }
+            dataOutputStream.close();
             dataOutputStream.flush();
         } catch (IOException e) {
             e.printStackTrace();
@@ -45,6 +46,7 @@ public class Utils {
             while ((sum = dataInputStream.read(buffer)) != -1) {
                 fos.write(buffer, 0, sum);
             }
+            fos.close();
             System.out.println("备份文件结束");
         } catch (IOException e) {
             e.printStackTrace();
@@ -67,6 +69,8 @@ public class Utils {
             while ((sum = dataInputStream.read(buffer)) != -1) {
                 fos.write(buffer, 0, sum);
             }
+            fos.close();
+            System.out.println("流关系Hello");
             System.out.println("写入文件完成...");
             // 开始备份信息
             Socket socket1 = new Socket("127.0.0.1", port);
@@ -87,6 +91,7 @@ public class Utils {
             while ((line = fis.read(buffer)) != -1) {
                 dataOutputStream.write(buffer, 0, line);
             }
+            fis.close();
             dataOutputStream.flush();
             System.out.println("写入的长度是" + dataOutputStream.size());
             System.out.println("运行的线程是" + Thread.currentThread().getName());

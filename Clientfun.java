@@ -22,7 +22,7 @@ public class Clientfun {
                 return;
             }
             DataInputStream dataInputStream = new DataInputStream(socket.getInputStream());
-            File file1 = RequestuploadtoFileSer(new File(filename), socket);
+            File file1 = RequestuploadtoFileSer(file, socket);
             String uuid = dataInputStream.readUTF();
             if (uuid.equals("empty")){
                 System.out.println("存储服务器出现异常");
@@ -105,8 +105,10 @@ public class Clientfun {
     private File getCandEfile(File file) {
         File file1 = ZipUtil.zip(file.getName());
         File file2 = Tool.getEncryptfile(file1);
-        file1.delete();
         long len = file2.length();
+        if (file1.delete()){
+            System.out.println("文件1删除");
+        }
         System.out.println("传上去的文件大小"+len);
         return file2;
     }
@@ -129,8 +131,11 @@ public class Clientfun {
             long time2 = System.currentTimeMillis();
             System.out.println("用时间"+((time2-time1)/1000)+"s");
             dataOutputStream.flush();
+            fis.close();
             System.out.println("文件结束");
-            file.delete();  // 将压缩文件和加密文件删除
+            if (file.delete()){
+                System.out.println("文件2删除");
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
